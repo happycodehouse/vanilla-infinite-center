@@ -1,0 +1,63 @@
+@use "shared/css/base/fonts" as *;
+@use "shared/css/base/variable" as *;
+@use "shared/css/base/mixin" as *;
+@use "shared/css/base/reset" as *;
+
+:root {
+    font-size: 12px;
+    --page-padding: 1.5rem;
+    --base-ratio: 0.75;
+    --base-size: 1536;
+    --base-percent: 100vw;
+
+    @include media(false, tablet) {
+        --base-ratio: 1;
+        --base-size: 1;
+        --base-percent: 1px;
+    }
+}
+
+.wrap {
+    overflow: hidden;
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+header {
+    width: $headerW;
+    border-right: 1px solid black;
+    padding: var(--page-padding);
+
+    * {
+        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: inherit;
+    }
+
+    .gnb {
+        margin: to_vw(8) 0;
+
+        li {
+            &.active,
+            &:hover {
+                text-decoration: underline;
+            }
+
+            &.active {
+                font-weight: bold;
+            }
+
+            margin: to_vw(4) 0;
+        }
+    }
+}
+
+.container {
+    width: calc(100% - #{$headerW});
+
+    iframe {
+        width: 100%;
+        height: 100%;
+
+    }
+}
