@@ -26,12 +26,12 @@ function getConfig() {
     const rightOriginX = baseX + gap;
     const leftOriginX = baseX - (slideItemW / 2) - (gap * 2);
 
-    return { maskW, gap, slideItemW, centerItemNextX, centerItemPrevX, rightOriginX, leftOriginX };
+    return {maskW, gap, slideItemW, centerItemNextX, centerItemPrevX, rightOriginX, leftOriginX};
 }
 
 function staticPosition(direction = "next") {
     const slideItems = getSlideItems();
-    const { gap, slideItemW, centerItemNextX, centerItemPrevX, rightOriginX, leftOriginX } = getConfig();
+    const {gap, slideItemW, centerItemNextX, centerItemPrevX, rightOriginX, leftOriginX} = getConfig();
     const centerItemX = direction === "next" ? centerItemNextX : centerItemPrevX;
 
     slideItems.forEach((item, idx) => {
@@ -93,7 +93,7 @@ function move(direction) {
 
     // 2. 방향 바뀔 때 pos 0을 반대편 출발 위치로 순간이동
     if (directionChanged) {
-        const { gap, slideItemW, centerItemNextX, centerItemPrevX } = getConfig();
+        const {gap, slideItemW, centerItemNextX, centerItemPrevX} = getConfig();
         const centerItemX = direction === "next" ? centerItemNextX : centerItemPrevX;
         const currentCenterItem = Array.from(slideItems).find(i => parseInt(i.dataset.pos) === 0);
         if (currentCenterItem) {
@@ -120,7 +120,7 @@ function move(direction) {
     // 5. requestAnimationFrame
     requestAnimationFrame(() => {
         $slideItems.offsetHeight;
-        const { gap, slideItemW, centerItemNextX, centerItemPrevX } = getConfig();
+        const {gap, slideItemW, centerItemNextX, centerItemPrevX} = getConfig();
         const centerItemX = direction === "next" ? centerItemNextX : centerItemPrevX;
 
         // transition 추가 + pos 변경
@@ -151,7 +151,7 @@ function move(direction) {
             }
         });
 
-        const { centerItemNextX, centerItemPrevX } = getConfig();
+        const {centerItemNextX, centerItemPrevX} = getConfig();
         const centerItemX = direction === "next" ? centerItemNextX : centerItemPrevX;
         const centerItem = Array.from(getSlideItems()).find(s => parseInt(s.dataset.pos) === 0);
         if (centerItem) {

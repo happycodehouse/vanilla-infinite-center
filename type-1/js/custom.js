@@ -6,7 +6,7 @@ const $carousel = document.querySelector(".carousel"),
     $paginationTotal = document.querySelector("#total");
 
 
-let config = { gap: 10, widthPercent: 20 };
+let config = {gap: 10, widthPercent: 20};
 let isTransitioning = false;
 
 /**
@@ -14,7 +14,7 @@ let isTransitioning = false;
  */
 function staticPosition() {
     const currentSlides = document.querySelectorAll(".slide");
-    const { gap, widthPercent } = config;
+    const {gap, widthPercent} = config;
     const carouselWidth = $carousel.offsetWidth;
 
     currentSlides.forEach((slide) => {

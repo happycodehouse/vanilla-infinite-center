@@ -38,8 +38,7 @@
     position: relative;
     width: calc(20vw - to_vw(10));
     height: 100%;
-    border-inline: 1px solid $maskColor;
-    border-block: 1px solid $maskColor;
+    border: 1px solid $maskColor;
     background: $slideColor;
 
     &.absolute {
