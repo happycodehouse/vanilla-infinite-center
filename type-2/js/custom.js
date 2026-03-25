@@ -34,7 +34,7 @@ function staticPosition(direction = "next") {
     const {gap, slideItemW, centerItemNextX, centerItemPrevX, rightOriginX, leftOriginX} = getConfig();
     const centerItemX = direction === "next" ? centerItemNextX : centerItemPrevX;
 
-    slideItems.forEach((item, idx) => {
+    slideItems.forEach((item) => {
         const posIndex = parseInt(item.dataset.pos);
         const offset = -(slideItemW / 2) + (posIndex * (slideItemW + gap));
 

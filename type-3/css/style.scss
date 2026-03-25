@@ -1,0 +1,99 @@
+@charset "UTF-8";
+
+@use "../../shared/css/base/fonts" as *;
+@use "../../shared/css/base/variable" as *;
+@use "../../shared/css/base/mixin" as *;
+@use "../../shared/css/base/reset" as *;
+@use "../../shared/css/base/container" as *;
+
+:root {
+    --gap: 5vw;
+    --maskW: 30vw;
+    --slideItemW: 15vw;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100vh;
+}
+
+.mask {
+    //display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: var(--maskW);
+    aspect-ratio: 1 / 1;
+    border: 10px solid $maskColor;
+    border-radius: 50%;
+    padding-block: 1px;
+
+    &.active {
+        z-index: 9;
+        background: $maskColor;
+
+        .mask-item {
+            display: flex;
+        }
+    }
+
+    &-btn {
+        &:hover {
+            text-decoration: underline;
+        }
+
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 1;
+        padding: var(--page-padding);
+        font-family: "AustinNewsDeckWeb", sans-serif;
+    }
+}
+
+.vic {
+    overflow: hidden;
+    width: 100%;
+
+    &-wrapper {
+        width: 100%;
+        height: 24vw;
+    }
+
+    &-slide {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: var(--slideItemW);
+        aspect-ratio: 1 / 1;
+        border: 1px solid $maskColor;
+        border-radius: 50%;
+        background: $slideColor;
+
+        &.transition {
+            transition: left 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+    }
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: to_vw(10);
+
+    button {
+        &:hover {
+            text-decoration: underline;
+        }
+
+        font-family: "AustinNewsDeckWeb", sans-serif;
+    }
+}
