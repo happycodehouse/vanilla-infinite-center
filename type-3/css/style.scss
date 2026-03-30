@@ -88,6 +88,8 @@
     align-items: center;
     justify-content: center;
     gap: to_vw(10);
+    position: relative;
+    z-index: 9999;
 
     button {
         &:hover {
@@ -95,5 +97,6 @@
         }
 
         font-family: "AustinNewsDeckWeb", sans-serif;
+        color: white;
     }
 }
