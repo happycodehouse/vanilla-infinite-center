@@ -84,16 +84,15 @@ function move(direction) {
 
     // 2. 방향 바뀔 때 pos 0을 반대편 출발 위치로 순간이동
     if (directionChanged) {
-        const {gap, slideW, centerNextX, centerPrevX} = getConfig();
+        const {gap, slideW, maskW, centerNextX, centerPrevX} = getConfig();
         const centerX = direction === "next" ? centerNextX : centerPrevX;
         const currentCenterItem = Array.from($slides).find(i => Number(i.dataset.pos) === 0);
 
         if (currentCenterItem) {
             currentCenterItem.classList.remove("transition");
-            currentCenterItem.style.left = `${centerX + (direction === "next" ? 1 : -1) * slideW}px`;
+            currentCenterItem.style.left = `${centerX + (direction === "next" ? 1 : -1) * (maskW / 2)}px`;
         }
     }
-
     // 3. 클론 생성 및 append
     const targetPos = direction === "next" ? minPos : maxPos;
     const newPos = direction === "next" ? maxPos + 1 : minPos - 1;
@@ -108,11 +107,12 @@ function move(direction) {
     }
 
     staticPos(direction);
+    // $mask.classList.add("animate");
 
     requestAnimationFrame(() => {
         // force reflow: 이전 DOM 변경 레이아웃 확정
         void $vicWrapper.offsetHeight;
-        const {gap, slideW, centerNextX, centerPrevX} = getConfig();
+        const {gap, slideW, maskW, centerNextX, centerPrevX} = getConfig();
         const centerX = direction === "next" ? centerNextX : centerPrevX;
 
         getSlides().forEach(i => {
@@ -125,7 +125,7 @@ function move(direction) {
 
         // incomingItem 출발 위치 조정
         if (incomingItem) {
-            incomingItem.style.left = `${centerX + (direction === "next" ? 1 : -1) * slideW}px`;
+            incomingItem.style.left = `${centerX + (direction === "next" ? 1 : -1) * (maskW / 2)}px`;
         }
     });
 
@@ -140,23 +140,28 @@ function move(direction) {
         const {centerNextX, centerPrevX} = getConfig();
         const centerX = direction === "next" ? centerNextX : centerPrevX;
         const centerItem = Array.from(getSlides()).find(s => Number(s.dataset.pos) === 0);
+
         if (centerItem) {
             centerItem.classList.remove("transition");
             centerItem.style.left = `${centerX}px`;
             requestAnimationFrame(() => centerItem.classList.add("transition"));
         }
 
+        // $mask.classList.remove("animate");
+
         isTransitioning = false;
     }, 500);
 }
 
-initVic();
-
 window.addEventListener("load", () => {
+    initVic();
+
     if ($maskBtn.textContent === "MASK ON") {
         $mask.classList.add("active");
     }
 });
+
+window.addEventListener("resize", staticPos);
 
 $maskBtn.addEventListener("click", () => {
     $mask.classList.toggle("active");

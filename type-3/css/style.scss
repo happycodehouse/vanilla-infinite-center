@@ -22,15 +22,30 @@
 
 .mask {
     //display: none;
+    overflow: hidden;
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: var(--maskW);
     aspect-ratio: 1 / 1;
-    border: 10px solid $maskColor;
     border-radius: 50%;
     padding-block: 1px;
+    background: $maskColor;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 0;
+        height: 0;
+        border-radius: inherit;
+        background: $slideColor;
+        opacity: .5;
+        transition: all .5s ease-in-out;
+    }
 
     &.active {
         z-index: 9;
@@ -38,6 +53,13 @@
 
         .mask-item {
             display: flex;
+        }
+    }
+
+    &.animate {
+        &::before {
+            width: 100%;
+            height: 100%;
         }
     }
 

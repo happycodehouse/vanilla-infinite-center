@@ -55,6 +55,14 @@ header {
 .container {
     width: calc(100% - #{$headerW});
 
+    .readme {
+        padding: var(--page-padding);
+
+        p {
+
+        }
+    }
+
     iframe {
         width: 100%;
         height: 100%;
