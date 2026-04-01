@@ -9,6 +9,8 @@ const rootStyle = getComputedStyle(document.documentElement);
 let isTransitioning = false;
 let lastDirection = null;
 
+const DURATION = 0.5;
+
 function getSlides() {
     return document.querySelectorAll(".vic-slide");
 }
@@ -24,7 +26,7 @@ function getConfig() {
     const maskRight = (window.innerWidth + maskW) / 2;
     const maskLeft = (window.innerWidth - maskW) / 2;
 
-    return {slideW, maskW, gap, centerNextX, centerPrevX, maskRight, maskLeft};
+    return { slideW, maskW, gap, centerNextX, centerPrevX, maskRight, maskLeft };
 }
 
 function initVic() {
@@ -50,20 +52,38 @@ function initVic() {
 
 function staticPos(direction = "next") {
     const $slides = getSlides();
-    const {slideW, gap, centerNextX, centerPrevX, maskRight, maskLeft} = getConfig();
+    const { slideW, gap, centerNextX, centerPrevX, maskRight, maskLeft } = getConfig();
     const centerX = direction === "next" ? centerNextX : centerPrevX;
 
     $slides.forEach((i) => {
         const posIdx = Number(i.dataset.pos);
 
         if (posIdx === 0) {
-            i.style.left = `${centerX}px`;
+            gsap.set(i, { left: centerX });
         } else if (posIdx > 0) {
-            i.style.left = `${maskRight + (posIdx - 1) * (slideW + gap) + gap}px`;
+            gsap.set(i, { left: maskRight + (posIdx - 1) * (slideW + gap) + gap });
         } else {
-            i.style.left = `${maskLeft + posIdx * (slideW + gap)}px`;
+            gsap.set(i, { left: maskLeft + posIdx * (slideW + gap) });
         }
     });
+}
+
+function animatePos(direction = "next", onComplete) {
+    const $slides = getSlides();
+    const { slideW, gap } = getConfig();
+    const tweens = [];
+    const unitDist = slideW + gap;
+
+    $slides.forEach((i) => {
+        const currentX = parseFloat(gsap.getProperty(i, "left"));
+        const targetX = currentX + (direction === "next" ? -1 : 1) * unitDist;
+
+        tweens.push(gsap.to(i, { left: targetX, duration: DURATION, ease: "power2.inOut" }));
+    });
+
+    if (tweens.length > 0 && onComplete) {
+        tweens[tweens.length - 1].eventCallback("onComplete", onComplete);
+    }
 }
 
 function move(direction) {
@@ -76,24 +96,21 @@ function move(direction) {
     const minPos = Math.min(...posArray);
     const maxPos = Math.max(...posArray);
 
-    const incomingItem = Array.from($slides).find(i=>
-        Number(i.dataset.pos) === (direction === "next" ? 1 : -1)
-    );
-
     const directionChanged = lastDirection !== null && lastDirection !== direction;
 
     // 2. 방향 바뀔 때 pos 0을 반대편 출발 위치로 순간이동
     if (directionChanged) {
-        const {gap, slideW, maskW, centerNextX, centerPrevX} = getConfig();
+        const { centerNextX, centerPrevX, maskW } = getConfig();
         const centerX = direction === "next" ? centerNextX : centerPrevX;
         const currentCenterItem = Array.from($slides).find(i => Number(i.dataset.pos) === 0);
 
         if (currentCenterItem) {
-            currentCenterItem.classList.remove("transition");
-            currentCenterItem.style.left = `${centerX + (direction === "next" ? 1 : -1) * (maskW / 2)}px`;
+            gsap.killTweensOf(currentCenterItem);
+            gsap.set(currentCenterItem, { left: centerX });
         }
     }
-    // 3. 클론 생성 및 append
+
+    // 3. 클론 생성 및 append + 출발 위치 세팅
     const targetPos = direction === "next" ? minPos : maxPos;
     const newPos = direction === "next" ? maxPos + 1 : minPos - 1;
 
@@ -101,35 +118,28 @@ function move(direction) {
 
     if (outgoing) {
         const clone = outgoing.cloneNode(true);
-        clone.classList.remove("transition", "active");
+        clone.classList.remove("active");
         clone.dataset.pos = newPos;
         $vicWrapper.append(clone);
+
+        // 클론 출발 위치 세팅
+        const { slideW, gap, maskRight, maskLeft } = getConfig();
+        const posIdx = newPos;
+        if (posIdx > 0) {
+            gsap.set(clone, { left: maskRight + (posIdx - 1) * (slideW + gap) + gap });
+        } else {
+            gsap.set(clone, { left: maskLeft + posIdx * (slideW + gap) });
+        }
     }
 
-    staticPos(direction);
-    // $mask.classList.add("animate");
-
-    requestAnimationFrame(() => {
-        // force reflow: 이전 DOM 변경 레이아웃 확정
-        void $vicWrapper.offsetHeight;
-        const {gap, slideW, maskW, centerNextX, centerPrevX} = getConfig();
-        const centerX = direction === "next" ? centerNextX : centerPrevX;
-
-        getSlides().forEach(i => {
-            const currentPos = Number(i.dataset.pos);
-            i.classList.add("transition");
-            i.dataset.pos = direction === "next" ? currentPos - 1 : currentPos + 1;
-        });
-
-        staticPos(direction);
-
-        // incomingItem 출발 위치 조정
-        if (incomingItem) {
-            incomingItem.style.left = `${centerX + (direction === "next" ? 1 : -1) * (maskW / 2)}px`;
-        }
+    // 5. pos 변경
+    getSlides().forEach(i => {
+        const currentPos = Number(i.dataset.pos);
+        i.dataset.pos = direction === "next" ? currentPos - 1 : currentPos + 1;
     });
 
-    setTimeout(() => {
+    // 6. 애니메이션
+    animatePos(direction, () => {
         getSlides().forEach(i => {
             const pos = Number(i.dataset.pos);
             if ((direction === "next" && pos < minPos) || (direction === "prev" && pos > maxPos)) {
@@ -137,20 +147,19 @@ function move(direction) {
             }
         });
 
-        const {centerNextX, centerPrevX} = getConfig();
+        const { centerNextX, centerPrevX } = getConfig();
         const centerX = direction === "next" ? centerNextX : centerPrevX;
         const centerItem = Array.from(getSlides()).find(s => Number(s.dataset.pos) === 0);
 
         if (centerItem) {
-            centerItem.classList.remove("transition");
-            centerItem.style.left = `${centerX}px`;
-            requestAnimationFrame(() => centerItem.classList.add("transition"));
+            gsap.set(centerItem, { left: centerX });
         }
 
-        // $mask.classList.remove("animate");
-
         isTransitioning = false;
-    }, 500);
+    });
+
+    // 7. lastDirection 업데이트
+    lastDirection = direction;
 }
 
 window.addEventListener("load", () => {
