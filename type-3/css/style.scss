@@ -10,6 +10,17 @@
     --gap: 5vw;
     --maskW: 30vw;
     --slideItemW: 15vw;
+    --clip: 0 0 0 100%;
+}
+
+@mixin background {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+header {
+    color: #ffffff;
 }
 
 .container {
@@ -18,10 +29,10 @@
     justify-content: center;
     width: 100%;
     height: 100vh;
+    background: #000;
 }
 
 .mask {
-    //display: none;
     overflow: hidden;
     position: fixed;
     top: 50%;
@@ -31,7 +42,6 @@
     aspect-ratio: 1 / 1;
     border-radius: 50%;
     padding-block: 1px;
-    background: $maskColor;
 
     &::before {
         content: '';
@@ -49,11 +59,6 @@
 
     &.active {
         z-index: 9;
-        background: $maskColor;
-
-        .mask-item {
-            display: flex;
-        }
     }
 
     &.animate {
@@ -74,6 +79,69 @@
         z-index: 1;
         padding: var(--page-padding);
         font-family: "AustinNewsDeckWeb", sans-serif;
+        color: #ffffff;
+    }
+
+    > div { // .mask-logo, .mask-item
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        height: 100%;
+        padding: var(--page-padding);
+    }
+
+    &-cover {
+        @include background;
+    }
+
+    &-item {
+        $mask-items: 'al', 'bullseye', 'buzz-lightyear', 'emperor-zurg', 'jessie', 'mrs-potato-head', 'the-prospector', 'wheezy', 'woody';
+
+        @each $name in $mask-items {
+            &[data-mask="#{$name}"] {
+                background-image: url('../images/#{$name}.jpg');
+            }
+        }
+
+        //clip-path: inset(var(--clip));
+        @include background;
+
+        &.active {
+            --clip: 0 0 0 0;
+            z-index: 99;
+        }
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        span, p {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            color: white;
+        }
+
+        span {
+            font-weight: bold;
+        }
+
+        p {
+            width: 66.6%;
+        }
     }
 }
 
@@ -87,6 +155,13 @@
     }
 
     &-slide {
+        $slide-items: 'al', 'bullseye', 'buzz-lightyear', 'emperor-zurg', 'jessie', 'mrs-potato-head', 'the-prospector', 'wheezy', 'woody';
+        @each $name in $slide-items {
+            &[data-slide="#{$name}"] {
+                background-image: url('./../images/#{$name}.jpg');
+            }
+        }
+
         display: flex;
         align-items: center;
         justify-content: center;
@@ -95,13 +170,8 @@
         transform: translateY(-50%);
         width: var(--slideItemW);
         aspect-ratio: 1 / 1;
-        border: 1px solid $maskColor;
         border-radius: 50%;
-        background: $slideColor;
-
-        &.transition {
-            transition: left 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
-        }
+        @include background;
     }
 }
 

@@ -40,14 +40,27 @@ header {
         li {
             &.active,
             &:hover {
-                text-decoration: underline;
+                a {
+                    text-decoration: underline;
+                }
             }
 
             &.active {
-                font-weight: bold;
+                a {
+                    font-weight: bold !important;
+                }
             }
 
+            position: relative;
             margin: to_vw(4) 0;
+            padding-left: to_vw(16);
+
+            &::before {
+                content: '└';
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
         }
     }
 }
