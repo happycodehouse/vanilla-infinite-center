@@ -20,8 +20,12 @@
 }
 
 @keyframes blinkAni {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0; }
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
 }
 
 header {
@@ -208,7 +212,7 @@ header {
 
 .pagination {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0 to_vw(16);
     position: fixed;
     top: to_vw(24);
@@ -224,6 +228,11 @@ header {
         text-align: left;
         font-size: inherit;
         color: #ffffff;
+
+        &:hover {
+            text-decoration: underline;
+            color: $slideColor;
+        }
 
         &.active {
             text-decoration: underline;

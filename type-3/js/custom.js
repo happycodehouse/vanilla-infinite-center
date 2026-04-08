@@ -3,7 +3,8 @@ const $vicWrapper = document.querySelector(".vic-wrapper");
 const $nextBtn = document.getElementById("nextBtn");
 const $prevBtn = document.getElementById("prevBtn");
 const $maskItem = document.querySelectorAll(".mask-item");
-const $maskBtn = document.getElementById("maskBtn");
+const $maskBtn = document.getElementById("maskBtn")
+const $pagination = document.getElementById("pagination");
 
 const rootStyle = getComputedStyle(document.documentElement);
 const DURATION = 0.5;
@@ -191,7 +192,6 @@ function updateActiveMask(direction = "next") {
 
             const firstMaskItem = document.querySelector(`.mask-item[data-mask="${firstSlideValue}"]`);
             const lastMaskItem = document.querySelector(`.mask-item[data-mask="${lastSlideValue}"]`);
-
             if (firstMaskItem) firstMaskItem.classList.add("z2");
             if (lastMaskItem) lastMaskItem.classList.remove("active");
 
@@ -210,6 +210,9 @@ function updateActiveMask(direction = "next") {
             {clipPath: "inset(0 0 0 100%)"},
             {clipPath: "inset(0 0 0 0%)", duration: DURATION, ease: "power2.inOut"}
         );
+
+        updatePagination(activeNum);
+
     } else {
         const leavingSlide = Array.from($slides).find(s => Number(s.dataset.pos) === 1);
         const centerSlide = Array.from($slides).find(s => Number(s.dataset.pos) === 0);
@@ -256,7 +259,15 @@ function updateActiveMask(direction = "next") {
                 }
             );
         }
+
+        updatePagination(centerNum);
     }
+}
+
+function updatePagination(activeSlide) {
+    document.querySelectorAll('#pagination button').forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.slide === activeSlide);
+    });
 }
 
 window.addEventListener("load", () => {
