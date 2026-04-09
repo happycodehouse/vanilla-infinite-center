@@ -270,6 +270,75 @@ function updatePagination(activeSlide) {
     });
 }
 
+function updateMaskOnJump(targetSlide) {
+    const maskValues = Array.from($maskItem).map(m => m.dataset.mask);
+    const maskTargetIndex = maskValues.indexOf(targetSlide);
+
+    // 전체 리셋
+    $maskItem.forEach(item => {
+        item.classList.remove("active", "z2");
+        gsap.set(item, {clipPath: "inset(0 0 0 100%)"});
+    });
+
+    // 0번부터 maskTargetIndex - 1까지 바로 active
+    $maskItem.forEach((item, idx) => {
+        if (idx < maskTargetIndex) {
+            item.classList.add("active");
+            gsap.set(item, {clipPath: "inset(0 0 0 0%)"});
+        }
+    });
+
+    // 현재 center만 애니메이션으로 열기
+    const targetItem = $maskItem[maskTargetIndex];
+    if (targetItem) {
+        targetItem.classList.add("active");
+        gsap.fromTo(targetItem,
+            { clipPath: "inset(0 0 0 100%)" },
+            {
+                clipPath: "inset(0 0 0 0%)",
+                duration: DURATION,
+                ease: "power2.inOut",
+                onComplete: () => {
+                    isTransitioning = false;
+                }
+            }
+        );
+    }
+}
+
+function jumpTo(targetSlide) {
+    if (isTransitioning) return;
+    isTransitioning = true;
+
+    const slideValues = Array.from(new Set(
+        Array.from(document.querySelectorAll(".vic-slide")).map(s => s.dataset.slide)
+    ));
+    const targetIndex = slideValues.indexOf(targetSlide);
+    const total = slideValues.length;
+
+    // 1. pos 재계산
+    const $slides = getSlides();
+
+    $slides.forEach(slide => {
+        const slideIndex = slideValues.indexOf(slide.dataset.slide);
+        let pos = slideIndex - targetIndex;
+        if (pos > total / 2) pos -= total;
+        if (pos < -total / 2) pos += total;
+        slide.dataset.pos = pos;
+    });
+
+    // 2. 위치 순간이동
+    staticPos();
+    Array.from(document.querySelectorAll('.vic-slide')).forEach(s => console.log(s.dataset.slide, s.dataset.pos));
+    // 3. mask 업데이트
+    updateMaskOnJump(targetSlide);
+
+    // 4. pagination 업데이트
+    updatePagination(targetSlide);
+
+    lastDirection = "next";
+}
+
 window.addEventListener("load", () => {
     initVic();
 
@@ -295,3 +364,9 @@ $maskBtn.addEventListener("click", () => {
 
 $nextBtn.addEventListener("click", () => move("next"));
 $prevBtn.addEventListener("click", () => move("prev"));
+
+$pagination.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    jumpTo(btn.dataset.slide);
+});
