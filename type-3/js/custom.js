@@ -6,8 +6,9 @@ const $maskItem = document.querySelectorAll(".mask-item");
 const $maskBtn = document.getElementById("maskBtn")
 const $pagination = document.getElementById("pagination");
 
-const rootStyle = getComputedStyle(document.documentElement);
+const leftCount = 2;
 const DURATION = 0.5;
+const rootStyle = getComputedStyle(document.documentElement);
 
 let isTransitioning = false;
 let lastDirection = null;
@@ -34,7 +35,6 @@ function getConfig() {
 function initVic() {
     const $slides = getSlides();
     const itemCount = $slides.length;
-    const leftCount = 2;
 
     $slides.forEach((i, idx) => {
         let pos;
@@ -99,11 +99,19 @@ function move(direction) {
     isTransitioning = true;
 
     const $slides = getSlides();
-    const posArray = Array.from($slides).map(i => Number(i.dataset.pos));
-    const minPos = Math.min(...posArray);
-    const maxPos = Math.max(...posArray);
+    const total = getSlides().length;
+    const minPos = -leftCount;
+    const maxPos = total - 1 - leftCount;
 
     const directionChanged = lastDirection !== null && lastDirection !== direction;
+
+    // 콘솔 확인
+    console.log("=== move ===", direction);
+    console.log("total:", total);
+    console.log("minPos:", minPos, "maxPos:", maxPos);
+    Array.from($slides).forEach(s => {
+        console.log(`slide: ${s.dataset.slide}, pos: ${s.dataset.pos}`);
+    });
 
     // 방향 바뀔 때 pos 0을 반대편 출발 위치로 순간이동
     if (directionChanged) {
@@ -270,25 +278,42 @@ function updatePagination(activeSlide) {
     });
 }
 
-function updateMaskOnJump(targetSlide) {
+function jumpTo(targetSlide) {
+    if (isTransitioning) return;
+    isTransitioning = true;
+
+    const $slides = Array.from(getSlides());
+    const total = $slides.length;
+    const targetIndex = $slides.findIndex(s => s.dataset.slide === targetSlide);
+
+    $slides.forEach((slide, i) => {
+        const idx = (i - targetIndex + total) % total;
+        let pos;
+        if (idx === 0) {
+            pos = 0;
+        } else if (idx <= total - 1 - leftCount) {
+            pos = idx;
+        } else {
+            pos = idx - total;
+        }
+        slide.dataset.pos = pos;
+    });
+
+    staticPos();
+    lastDirection = "next";
+
     const maskValues = Array.from($maskItem).map(m => m.dataset.mask);
     const maskTargetIndex = maskValues.indexOf(targetSlide);
 
-    // 전체 리셋
-    $maskItem.forEach(item => {
-        item.classList.remove("active", "z2");
-        gsap.set(item, {clipPath: "inset(0 0 0 100%)"});
-    });
-
-    // 0번부터 maskTargetIndex - 1까지 바로 active
     $maskItem.forEach((item, idx) => {
+        item.classList.remove("active", "z2");
+        gsap.set(item, { clipPath: "inset(0 0 0 100%)" });
         if (idx < maskTargetIndex) {
             item.classList.add("active");
-            gsap.set(item, {clipPath: "inset(0 0 0 0%)"});
+            gsap.set(item, { clipPath: "inset(0 0 0 0%)" });
         }
     });
 
-    // 현재 center만 애니메이션으로 열기
     const targetItem = $maskItem[maskTargetIndex];
     if (targetItem) {
         targetItem.classList.add("active");
@@ -298,45 +323,13 @@ function updateMaskOnJump(targetSlide) {
                 clipPath: "inset(0 0 0 0%)",
                 duration: DURATION,
                 ease: "power2.inOut",
-                onComplete: () => {
-                    isTransitioning = false;
-                }
+                onComplete: () => { isTransitioning = false; }
             }
         );
     }
-}
 
-function jumpTo(targetSlide) {
-    if (isTransitioning) return;
-    isTransitioning = true;
-
-    const slideValues = Array.from(new Set(
-        Array.from(document.querySelectorAll(".vic-slide")).map(s => s.dataset.slide)
-    ));
-    const targetIndex = slideValues.indexOf(targetSlide);
-    const total = slideValues.length;
-
-    // 1. pos 재계산
-    const $slides = getSlides();
-
-    $slides.forEach(slide => {
-        const slideIndex = slideValues.indexOf(slide.dataset.slide);
-        let pos = slideIndex - targetIndex;
-        if (pos > total / 2) pos -= total;
-        if (pos < -total / 2) pos += total;
-        slide.dataset.pos = pos;
-    });
-
-    // 2. 위치 순간이동
-    staticPos();
-    Array.from(document.querySelectorAll('.vic-slide')).forEach(s => console.log(s.dataset.slide, s.dataset.pos));
-    // 3. mask 업데이트
-    updateMaskOnJump(targetSlide);
-
-    // 4. pagination 업데이트
+    prevMaskItem = null;
     updatePagination(targetSlide);
-
-    lastDirection = "next";
 }
 
 window.addEventListener("load", () => {
