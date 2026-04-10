@@ -38,7 +38,6 @@ function initVic() {
 
     $slides.forEach((i, idx) => {
         let pos;
-
         if (idx === 0) {
             pos = 0;
         } else if (idx <= itemCount - 1 - leftCount) {
@@ -46,7 +45,6 @@ function initVic() {
         } else {
             pos = idx - itemCount;
         }
-
         i.dataset.pos = pos;
     });
 
@@ -99,21 +97,19 @@ function move(direction) {
     isTransitioning = true;
 
     const $slides = getSlides();
-    const total = getSlides().length;
-    const minPos = -leftCount;
-    const maxPos = total - 1 - leftCount;
+    const posArray = Array.from($slides).map(i => Number(i.dataset.pos));
+    const minPos = Math.min(...posArray);
+    const maxPos = Math.max(...posArray);
 
     const directionChanged = lastDirection !== null && lastDirection !== direction;
 
-    // 콘솔 확인
-    console.log("=== move ===", direction);
-    console.log("total:", total);
+    // ✅ before
+    console.log("=== before move ===", direction);
     console.log("minPos:", minPos, "maxPos:", maxPos);
     Array.from($slides).forEach(s => {
         console.log(`slide: ${s.dataset.slide}, pos: ${s.dataset.pos}`);
     });
 
-    // 방향 바뀔 때 pos 0을 반대편 출발 위치로 순간이동
     if (directionChanged) {
         const {centerNextX, centerPrevX} = getConfig();
         const centerX = direction === "next" ? centerNextX : centerPrevX;
@@ -125,7 +121,6 @@ function move(direction) {
         }
     }
 
-    // 클론 생성 및 출발 위치 세팅
     const targetPos = direction === "next" ? minPos : maxPos;
     const newPos = direction === "next" ? maxPos + 1 : minPos - 1;
     const outgoing = Array.from($slides).find(i => Number(i.dataset.pos) === targetPos);
@@ -144,13 +139,11 @@ function move(direction) {
         }
     }
 
-    // pos 변경
     getSlides().forEach(i => {
         const currentPos = Number(i.dataset.pos);
         i.dataset.pos = direction === "next" ? currentPos - 1 : currentPos + 1;
     });
 
-    // 애니메이션
     animatePos(direction, () => {
         getSlides().forEach(i => {
             const pos = Number(i.dataset.pos);
@@ -166,6 +159,12 @@ function move(direction) {
         if (centerItem) {
             gsap.set(centerItem, {left: centerX});
         }
+
+        // ✅ 애니메이션 끝난 후 콘솔
+        console.log("=== after move ===", direction);
+        Array.from(getSlides()).forEach(s => {
+            console.log(`slide: ${s.dataset.slide}, pos: ${s.dataset.pos}`);
+        });
 
         isTransitioning = false;
     });
@@ -190,7 +189,6 @@ function updateActiveMask(direction = "next") {
         if (prevMaskItem) prevMaskItem.classList.remove("z2");
         prevMaskItem = activeItem;
 
-        // 맨 마지막 슬라이드에서 맨 처음 슬라이드로 순환할 때
         if (leavingSlide && leavingSlide.dataset.slide === lastSlideValue) {
             $maskItem.forEach((item) => {
                 if (item.dataset.mask === lastSlideValue) return;
@@ -204,7 +202,6 @@ function updateActiveMask(direction = "next") {
             if (lastMaskItem) lastMaskItem.classList.remove("active");
 
         } else {
-            // prev로 전체 active 세팅된 상태에서 next로 전환할 때 리셋
             if (activeItem.classList.contains("active")) {
                 document.querySelectorAll('.mask-item.active').forEach(item => {
                     item.classList.remove("active");
@@ -232,7 +229,6 @@ function updateActiveMask(direction = "next") {
         const centerItem = document.querySelector(`.mask-item[data-mask="${centerNum}"]`);
         if (!leavingItem || !centerItem) return;
 
-        // prev 한바퀴 돌 때 맨 처음 슬라이드 mask 없어지는 문제 방지
         if (!centerItem.classList.contains("active")) {
             centerItem.classList.add("active");
             gsap.fromTo(centerItem,
@@ -241,14 +237,12 @@ function updateActiveMask(direction = "next") {
             );
         }
 
-        // 맨 처음 슬라이드에서 맨 마지막 슬라이드로 순환할 때
         if (leavingSlide.dataset.slide === firstSlideValue) {
             if (prevMaskItem) prevMaskItem.classList.remove("z2");
             prevMaskItem = leavingItem;
             prevMaskItem.classList.add("z2");
         }
 
-        // 맨 마지막 슬라이드로 점프할 때 전부 active
         if (centerNum === lastSlideValue) {
             $maskItem.forEach((item) => {
                 item.classList.add("active");
@@ -299,8 +293,13 @@ function jumpTo(targetSlide) {
         slide.dataset.pos = pos;
     });
 
+    console.log("=== jumpTo ===", targetSlide);
+    Array.from(getSlides()).forEach(s => {
+        console.log(`slide: ${s.dataset.slide}, pos: ${s.dataset.pos}`);
+    });
+
     staticPos();
-    lastDirection = "next";
+    lastDirection = null;
 
     const maskValues = Array.from($maskItem).map(m => m.dataset.mask);
     const maskTargetIndex = maskValues.indexOf(targetSlide);
@@ -361,5 +360,6 @@ $prevBtn.addEventListener("click", () => move("prev"));
 $pagination.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
+    if (btn.classList.contains("active")) return; // ✅ 이미 active면 무시
     jumpTo(btn.dataset.slide);
 });
