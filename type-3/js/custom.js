@@ -4,7 +4,6 @@ const $nextBtn = document.getElementById("nextBtn");
 const $prevBtn = document.getElementById("prevBtn");
 const $maskItem = document.querySelectorAll(".mask-item");
 const $maskBtn = document.getElementById("maskBtn");
-const $pagination = document.getElementById("pagination");
 
 const leftCount = 2;
 const DURATION = 0.5;
@@ -29,7 +28,7 @@ function getConfig() {
     const maskRight = (window.innerWidth + maskW) / 2;
     const maskLeft = (window.innerWidth - maskW) / 2;
 
-    return { slideW, maskW, gap, centerNextX, centerPrevX, maskRight, maskLeft };
+    return {slideW, maskW, gap, centerNextX, centerPrevX, maskRight, maskLeft};
 }
 
 function initVic() {
@@ -55,25 +54,25 @@ function initVic() {
 
 function staticPos(direction = "next") {
     const $slides = getSlides();
-    const { slideW, gap, centerNextX, centerPrevX, maskRight, maskLeft } = getConfig();
+    const {slideW, gap, centerNextX, centerPrevX, maskRight, maskLeft} = getConfig();
     const centerX = direction === "next" ? centerNextX : centerPrevX;
 
     $slides.forEach((i) => {
         const posIdx = Number(i.dataset.pos);
 
         if (posIdx === 0) {
-            gsap.set(i, { left: centerX });
+            gsap.set(i, {left: centerX});
         } else if (posIdx > 0) {
-            gsap.set(i, { left: maskRight + (posIdx - 1) * (slideW + gap) + gap });
+            gsap.set(i, {left: maskRight + (posIdx - 1) * (slideW + gap) + gap});
         } else {
-            gsap.set(i, { left: maskLeft + posIdx * (slideW + gap) });
+            gsap.set(i, {left: maskLeft + posIdx * (slideW + gap)});
         }
     });
 }
 
 function animatePos(direction = "next", onComplete) {
     const $slides = getSlides();
-    const { slideW, gap } = getConfig();
+    const {slideW, gap} = getConfig();
     const tweens = [];
     const unitDist = slideW + gap;
 
@@ -82,7 +81,7 @@ function animatePos(direction = "next", onComplete) {
     $slides.forEach((i) => {
         const currentX = parseFloat(gsap.getProperty(i, "left"));
         const targetX = currentX + (direction === "next" ? -1 : 1) * unitDist;
-        tweens.push(gsap.to(i, { left: targetX, duration: DURATION, ease: "power2.inOut" }));
+        tweens.push(gsap.to(i, {left: targetX, duration: DURATION, ease: "power2.inOut"}));
     });
 
     if (tweens.length > 0 && onComplete) {
@@ -104,13 +103,13 @@ function move(direction) {
     const directionChanged = lastDirection !== null && lastDirection !== direction;
 
     if (directionChanged) {
-        const { centerNextX, centerPrevX } = getConfig();
+        const {centerNextX, centerPrevX} = getConfig();
         const centerX = direction === "next" ? centerNextX : centerPrevX;
         const currentCenterItem = Array.from($slides).find(i => Number(i.dataset.pos) === 0);
 
         if (currentCenterItem) {
             gsap.killTweensOf(currentCenterItem);
-            gsap.set(currentCenterItem, { left: centerX });
+            gsap.set(currentCenterItem, {left: centerX});
         }
     }
 
@@ -124,11 +123,11 @@ function move(direction) {
         clone.dataset.pos = newPos;
         $vicWrapper.append(clone);
 
-        const { slideW, gap, maskRight, maskLeft } = getConfig();
+        const {slideW, gap, maskRight, maskLeft} = getConfig();
         if (newPos > 0) {
-            gsap.set(clone, { left: maskRight + (newPos - 1) * (slideW + gap) + gap });
+            gsap.set(clone, {left: maskRight + (newPos - 1) * (slideW + gap) + gap});
         } else {
-            gsap.set(clone, { left: maskLeft + newPos * (slideW + gap) });
+            gsap.set(clone, {left: maskLeft + newPos * (slideW + gap)});
         }
     }
 
@@ -145,12 +144,12 @@ function move(direction) {
             }
         });
 
-        const { centerNextX, centerPrevX } = getConfig();
+        const {centerNextX, centerPrevX} = getConfig();
         const centerX = direction === "next" ? centerNextX : centerPrevX;
         const centerItem = Array.from(getSlides()).find(s => Number(s.dataset.pos) === 0);
 
         if (centerItem) {
-            gsap.set(centerItem, { left: centerX });
+            gsap.set(centerItem, {left: centerX});
         }
 
         isTransitioning = false;
@@ -158,6 +157,46 @@ function move(direction) {
 
     lastDirection = direction;
 }
+
+// ---- pagination 관련 추가 ----
+
+function updatePagination(activeSlide) {
+    document.querySelectorAll('#pagination button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.slide === activeSlide);
+    });
+}
+
+function jumpTo(targetSlide) {
+    if (isTransitioning) return;
+
+    const $slides = getSlides();
+    const targetEl = Array.from($slides).find(s => s.dataset.slide === targetSlide);
+    if (!targetEl) return;
+
+    const steps = Number(targetEl.dataset.pos);
+    if (steps === 0) return;
+
+    const direction = steps > 0 ? "next" : "prev";
+    const count = Math.abs(steps);
+
+    $nextBtn.disabled = true;
+    $prevBtn.disabled = true;
+
+    let i = 0;
+    function step() {
+        if (i >= count) {
+            $nextBtn.disabled = false;
+            $prevBtn.disabled = false;
+            return;
+        }
+        i++;
+        move(direction);
+        setTimeout(step, DURATION * 1000 + 50);
+    }
+    step();
+}
+
+// ---- 기존 updateActiveMask에 updatePagination 추가 ----
 
 function updateActiveMask(direction = "next") {
     const $slides = getSlides();
@@ -173,15 +212,16 @@ function updateActiveMask(direction = "next") {
         const activeItem = document.querySelector(`.mask-item[data-mask="${activeNum}"]`);
         if (!activeItem) return;
 
+        updatePagination(activeNum); // ← 추가
+
         if (prevMaskItem) prevMaskItem.classList.remove("z2");
         prevMaskItem = activeItem;
 
         if (leavingSlide && leavingSlide.dataset.slide === lastSlideValue) {
-            // 마지막 슬라이드가 나갈 때 → 전체 리셋 후 첫 번째부터 다시 쌓기
             $maskItem.forEach((item) => {
                 if (item.dataset.mask === lastSlideValue) return;
                 item.classList.remove("z2", "active");
-                gsap.set(item, { clipPath: "inset(0 0 0 100%)" });
+                gsap.set(item, {clipPath: "inset(0 0 0 100%)"});
             });
 
             const firstMaskItem = document.querySelector(`.mask-item[data-mask="${firstSlideValue}"]`);
@@ -190,38 +230,21 @@ function updateActiveMask(direction = "next") {
             if (lastMaskItem) lastMaskItem.classList.remove("active");
 
         } else {
-            // activeItem이 active 여부와 관계없이
-            // prevMaskItem(이전 center였던 것) 이후에 active 상태인 마스크를 정리
-            const prevIdx = Array.from($maskItem).indexOf(prevMaskItem);
-            const activeIdx = Array.from($maskItem).indexOf(activeItem);
-
-            // prevMaskItem보다 인덱스가 크고, activeItem보다 작은 것 중 active 잔류 정리
-            $maskItem.forEach((item, idx) => {
-                if (idx > prevIdx && idx < activeIdx && item.classList.contains("active")) {
+            if (activeItem.classList.contains("active")) {
+                document.querySelectorAll('.mask-item.active').forEach(item => {
                     item.classList.remove("active");
-                    gsap.set(item, { clipPath: "inset(0 0 0 100%)" });
-                }
-            });
-
-            // activeItem 이후에 active 잔류가 있으면 정리 (jumpTo 후 역방향 이동 등)
-            $maskItem.forEach((item, idx) => {
-                if (idx > activeIdx && item.classList.contains("active")) {
-                    item.classList.remove("active");
-                    gsap.set(item, { clipPath: "inset(0 0 0 100%)" });
-                }
-            });
+                    gsap.set(item, {clipPath: "inset(0 0 0 100%)"});
+                });
+            }
         }
 
         activeItem.classList.add("active");
         gsap.fromTo(activeItem,
-            { clipPath: "inset(0 0 0 100%)" },
-            { clipPath: "inset(0 0 0 0%)", duration: DURATION, ease: "power2.inOut" }
+            {clipPath: "inset(0 0 0 100%)"},
+            {clipPath: "inset(0 0 0 0%)", duration: DURATION, ease: "power2.inOut"}
         );
 
-        updatePagination(activeNum);
-
     } else {
-        // prev 방향
         const leavingSlide = Array.from($slides).find(s => Number(s.dataset.pos) === 1);
         const centerSlide = Array.from($slides).find(s => Number(s.dataset.pos) === 0);
         if (!leavingSlide || !centerSlide) return;
@@ -232,23 +255,15 @@ function updateActiveMask(direction = "next") {
         const centerItem = document.querySelector(`.mask-item[data-mask="${centerNum}"]`);
         if (!leavingItem || !centerItem) return;
 
-        // ✅ centerItem이 active가 아닐 때도 강제로 세팅 (jumpTo 후 prev 등)
+        updatePagination(centerNum); // ← 추가
+
         if (!centerItem.classList.contains("active")) {
             centerItem.classList.add("active");
             gsap.fromTo(centerItem,
-                { clipPath: "inset(0 100% 0 0)" },
-                { clipPath: "inset(0 0% 0 0)", duration: DURATION, ease: "power2.inOut" }
+                {clipPath: "inset(0 100% 0 0)"},
+                {clipPath: "inset(0 0% 0 0)", duration: DURATION, ease: "power2.inOut"}
             );
         }
-
-        // ✅ leavingItem 이후에 active 잔류 정리 (jumpTo 후 prev 시 발생할 수 있는 잔류)
-        const leavingIdx = Array.from($maskItem).indexOf(leavingItem);
-        $maskItem.forEach((item, idx) => {
-            if (idx > leavingIdx && item.classList.contains("active")) {
-                item.classList.remove("active");
-                gsap.set(item, { clipPath: "inset(0 0 0 100%)" });
-            }
-        });
 
         if (leavingSlide.dataset.slide === firstSlideValue) {
             if (prevMaskItem) prevMaskItem.classList.remove("z2");
@@ -259,13 +274,13 @@ function updateActiveMask(direction = "next") {
         if (centerNum === lastSlideValue) {
             $maskItem.forEach((item) => {
                 item.classList.add("active");
-                gsap.set(item, { clipPath: "inset(0 0 0 0%)" });
+                gsap.set(item, {clipPath: "inset(0 0 0 0%)"});
             });
         }
 
         if (leavingItem.classList.contains("active")) {
             gsap.fromTo(leavingItem,
-                { clipPath: "inset(0 0 0 0%)" },
+                {clipPath: "inset(0 0 0 0%)"},
                 {
                     clipPath: "inset(0 0 0 100%)",
                     duration: DURATION,
@@ -274,79 +289,10 @@ function updateActiveMask(direction = "next") {
                 }
             );
         }
-
-        updatePagination(centerNum);
     }
 }
 
-function updatePagination(activeSlide) {
-    document.querySelectorAll('#pagination button').forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.slide === activeSlide);
-    });
-}
-
-function jumpTo(targetSlide) {
-    if (isTransitioning) return;
-    isTransitioning = true;
-
-    const $slides = Array.from(getSlides());
-    const total = $slides.length;
-    const targetIndex = $slides.findIndex(s => s.dataset.slide === targetSlide);
-
-    $slides.forEach((slide, i) => {
-        const idx = (i - targetIndex + total) % total;
-        let pos;
-        if (idx === 0) {
-            pos = 0;
-        } else if (idx <= total - 1 - leftCount) {
-            pos = idx;
-        } else {
-            pos = idx - total;
-        }
-        slide.dataset.pos = pos;
-    });
-
-    // ✅ next 기준으로 배치
-    staticPos("next");
-
-    // ✅ lastDirection을 "next"로 고정해서 이후 move와 호환
-    lastDirection = "next";
-
-    const maskValues = Array.from($maskItem).map(m => m.dataset.mask);
-    const maskTargetIndex = maskValues.indexOf(targetSlide);
-
-    // 마스크 상태 초기화 및 재설정
-    $maskItem.forEach((item, idx) => {
-        item.classList.remove("active", "z2");
-        gsap.set(item, { clipPath: "inset(0 0 0 100%)" });
-        if (idx < maskTargetIndex) {
-            item.classList.add("active");
-            gsap.set(item, { clipPath: "inset(0 0 0 0%)" });
-        }
-    });
-
-    const targetItem = $maskItem[maskTargetIndex];
-    if (targetItem) {
-        targetItem.classList.add("active");
-        gsap.fromTo(targetItem,
-            { clipPath: "inset(0 0 0 100%)" },
-            {
-                clipPath: "inset(0 0 0 0%)",
-                duration: DURATION,
-                ease: "power2.inOut",
-                onComplete: () => { isTransitioning = false; }
-            }
-        );
-    } else {
-        isTransitioning = false;
-    }
-
-    // ✅ prevMaskItem을 target 바로 이전 항목으로 설정
-    // updateActiveMask("next")에서 z2 정리가 제대로 동작하도록
-    prevMaskItem = maskTargetIndex > 0 ? $maskItem[maskTargetIndex] : null;
-
-    updatePagination(targetSlide);
-}
+// ---- 이벤트 리스너 ----
 
 window.addEventListener("load", () => {
     initVic();
@@ -374,9 +320,9 @@ $maskBtn.addEventListener("click", () => {
 $nextBtn.addEventListener("click", () => move("next"));
 $prevBtn.addEventListener("click", () => move("prev"));
 
-$pagination.addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
-    if (!btn) return;
-    if (btn.classList.contains("active")) return;
-    jumpTo(btn.dataset.slide);
+// pagination 클릭 이벤트
+document.querySelectorAll('#pagination button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        jumpTo(btn.dataset.slide);
+    });
 });
