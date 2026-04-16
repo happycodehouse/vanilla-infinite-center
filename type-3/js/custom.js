@@ -158,8 +158,7 @@ function move(direction) {
     lastDirection = direction;
 }
 
-// ---- pagination 관련 추가 ----
-
+// pagination
 function updatePagination(activeSlide) {
     document.querySelectorAll('#pagination button').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.slide === activeSlide);
@@ -182,11 +181,23 @@ function jumpTo(targetSlide) {
     $nextBtn.disabled = true;
     $prevBtn.disabled = true;
 
+    // 이동 중: 목표 버튼 외 나머지 opacity 0.5
+    document.querySelectorAll('#pagination button').forEach(btn => {
+        btn.style.opacity = btn.dataset.slide === targetSlide ? "1" : "0.5";
+        btn.style.pointerEvents = btn.dataset.slide === targetSlide ? "auto" : "none";
+    });
+
     let i = 0;
     function step() {
         if (i >= count) {
             $nextBtn.disabled = false;
             $prevBtn.disabled = false;
+
+            // 도달 완료: 모든 버튼 opacity 복구
+            document.querySelectorAll('#pagination button').forEach(btn => {
+                btn.style.opacity = "1";
+                btn.style.pointerEvents = "auto";
+            });
             return;
         }
         i++;
@@ -196,8 +207,7 @@ function jumpTo(targetSlide) {
     step();
 }
 
-// ---- 기존 updateActiveMask에 updatePagination 추가 ----
-
+// mask
 function updateActiveMask(direction = "next") {
     const $slides = getSlides();
     const firstSlideValue = $maskItem[0].dataset.mask;
@@ -212,7 +222,7 @@ function updateActiveMask(direction = "next") {
         const activeItem = document.querySelector(`.mask-item[data-mask="${activeNum}"]`);
         if (!activeItem) return;
 
-        updatePagination(activeNum); // ← 추가
+        updatePagination(activeNum);
 
         if (prevMaskItem) prevMaskItem.classList.remove("z2");
         prevMaskItem = activeItem;
@@ -255,7 +265,7 @@ function updateActiveMask(direction = "next") {
         const centerItem = document.querySelector(`.mask-item[data-mask="${centerNum}"]`);
         if (!leavingItem || !centerItem) return;
 
-        updatePagination(centerNum); // ← 추가
+        updatePagination(centerNum);
 
         if (!centerItem.classList.contains("active")) {
             centerItem.classList.add("active");
@@ -271,13 +281,6 @@ function updateActiveMask(direction = "next") {
             prevMaskItem.classList.add("z2");
         }
 
-        if (centerNum === lastSlideValue) {
-            $maskItem.forEach((item) => {
-                item.classList.add("active");
-                gsap.set(item, {clipPath: "inset(0 0 0 0%)"});
-            });
-        }
-
         if (leavingItem.classList.contains("active")) {
             gsap.fromTo(leavingItem,
                 {clipPath: "inset(0 0 0 0%)"},
@@ -291,8 +294,6 @@ function updateActiveMask(direction = "next") {
         }
     }
 }
-
-// ---- 이벤트 리스너 ----
 
 window.addEventListener("load", () => {
     initVic();
@@ -320,7 +321,6 @@ $maskBtn.addEventListener("click", () => {
 $nextBtn.addEventListener("click", () => move("next"));
 $prevBtn.addEventListener("click", () => move("prev"));
 
-// pagination 클릭 이벤트
 document.querySelectorAll('#pagination button').forEach(btn => {
     btn.addEventListener('click', () => {
         jumpTo(btn.dataset.slide);
