@@ -5,13 +5,16 @@ const $prevBtn = document.getElementById("prevBtn");
 const $maskItem = document.querySelectorAll(".mask-item");
 const $maskBtn = document.getElementById("maskBtn");
 
-const leftCount = 2;
 const DURATION = 0.5;
 const rootStyle = getComputedStyle(document.documentElement);
 
 let isTransitioning = false;
-let lastDirection = null;
+let lastDirection = "next";
 let prevMaskItem = null;
+
+function getLeftCount() {
+    return window.innerWidth < 768 ? 1 : 2;
+}
 
 function getSlides() {
     return document.querySelectorAll(".vic-slide");
@@ -34,6 +37,9 @@ function getConfig() {
 function initVic() {
     const $slides = getSlides();
     const itemCount = $slides.length;
+    const leftCount = getLeftCount();
+
+    $slides.forEach(s => s.classList.remove("active"));
 
     $slides.forEach((i, idx) => {
         let pos;
@@ -181,7 +187,6 @@ function jumpTo(targetSlide) {
     $nextBtn.disabled = true;
     $prevBtn.disabled = true;
 
-    // 이동 중: 목표 버튼 외 나머지 opacity 0.5
     document.querySelectorAll('#pagination button').forEach(btn => {
         btn.style.opacity = btn.dataset.slide === targetSlide ? "1" : "0.5";
         btn.style.pointerEvents = btn.dataset.slide === targetSlide ? "auto" : "none";
@@ -193,7 +198,6 @@ function jumpTo(targetSlide) {
             $nextBtn.disabled = false;
             $prevBtn.disabled = false;
 
-            // 도달 완료: 모든 버튼 opacity 복구
             document.querySelectorAll('#pagination button').forEach(btn => {
                 btn.style.opacity = "1";
                 btn.style.pointerEvents = "auto";
@@ -304,14 +308,16 @@ window.addEventListener("load", () => {
         firstMaskItem.classList.add("active");
     }
 
-    lastDirection = "next";
-
     if ($maskBtn.textContent === "MASK ON") {
         $mask.classList.add("active");
     }
 });
 
-window.addEventListener("resize", () => staticPos(lastDirection));
+let resizeTimer;
+window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => initVic(), 200);
+});
 
 $maskBtn.addEventListener("click", () => {
     $mask.classList.toggle("active");
