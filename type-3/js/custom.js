@@ -11,18 +11,16 @@ const rootStyle = getComputedStyle(document.documentElement);
 let isTransitioning = false;
 let lastDirection = "next";
 let prevMaskItem = null;
+let slideData = [];
 
-// 화면 너비에 따라 center 슬라이드 기준 좌측 슬라이드 개수 반환 (모바일: 1개, 데스크탑: 2개)
 function getLeftCount() {
     return window.innerWidth < 768 ? 1 : 2;
 }
 
-// 현재 DOM에 존재하는 슬라이드 요소 반환
 function getSlides() {
     return document.querySelectorAll(".vic-slide");
 }
 
-// 슬라이드 및 마스크 영역의 크기와 좌표 계산값 반환
 function getConfig() {
     const $slides = getSlides();
     const slideW = $slides[0].offsetWidth;
@@ -37,25 +35,37 @@ function getConfig() {
     return {slideW, maskW, gap, centerNextX, centerPrevX, maskRight, maskLeft};
 }
 
-// 슬라이드 초기화: data-pos 부여, 위치 설정, 마스크 상태 초기화
-function initVic(centerSlideValue = null) {
+function initVic() {
+    gsap.killTweensOf(".vic-slide");
+
+    // 모든 슬라이드 제거 후 원본 순서로 재생성
+    Array.from(getSlides()).forEach(s => s.remove());
+    slideData.forEach(name => {
+        const div = document.createElement("div");
+        div.className = "vic-slide";
+        div.dataset.slide = name;
+        $vicWrapper.append(div);
+    });
+
     const $slides = getSlides();
     const itemCount = $slides.length;
     const leftCount = getLeftCount();
 
-    $slides.forEach(s => s.classList.remove("active"));
-
-    // 현재 center 슬라이드 기준으로 pos 재계산 (없으면 idx 0 기준)
-    const centerIdx = centerSlideValue
-        ? Array.from($slides).findIndex(s => s.dataset.slide === centerSlideValue)
-        : 0;
+    $maskItem.forEach(item => {
+        item.classList.remove("active", "z2");
+        gsap.set(item, {clipPath: "inset(0 0 0 100%)"});
+    });
+    prevMaskItem = null;
 
     $slides.forEach((i, idx) => {
-        let pos = idx - centerIdx;
-        // 오른쪽 범위 초과 보정
-        if (pos > itemCount - 1 - leftCount) pos -= itemCount;
-        // 왼쪽 범위 초과 보정
-        if (pos < -leftCount) pos += itemCount;
+        let pos;
+        if (idx === 0) {
+            pos = 0;
+        } else if (idx <= itemCount - 1 - leftCount) {
+            pos = idx;
+        } else {
+            pos = idx - itemCount;
+        }
         i.dataset.pos = pos;
     });
 
@@ -64,7 +74,6 @@ function initVic(centerSlideValue = null) {
     updateActiveMask();
 }
 
-// data-pos 기준으로 각 슬라이드의 left 위치를 즉시 설정 (애니메이션 없음)
 function staticPos(direction = "next") {
     const $slides = getSlides();
     const {slideW, gap, centerNextX, centerPrevX, maskRight, maskLeft} = getConfig();
@@ -83,7 +92,6 @@ function staticPos(direction = "next") {
     });
 }
 
-// 슬라이드 이동 애니메이션 및 마스크 클립패스 애니메이션 실행
 function animatePos(direction = "next", onComplete) {
     const $slides = getSlides();
     const {slideW, gap} = getConfig();
@@ -105,7 +113,6 @@ function animatePos(direction = "next", onComplete) {
     }
 }
 
-// 방향에 따라 슬라이드 클론 생성 및 이동 처리
 function move(direction) {
     if (isTransitioning) return;
     isTransitioning = true;
@@ -115,8 +122,8 @@ function move(direction) {
     const minPos = Math.min(...posArray);
     const maxPos = Math.max(...posArray);
 
-    // 방향 전환 시 center 슬라이드 위치 즉시 보정
     const directionChanged = lastDirection !== null && lastDirection !== direction;
+
     if (directionChanged) {
         const {centerNextX, centerPrevX} = getConfig();
         const centerX = direction === "next" ? centerNextX : centerPrevX;
@@ -128,7 +135,6 @@ function move(direction) {
         }
     }
 
-    // 반대편 끝에 클론 슬라이드 생성
     const targetPos = direction === "next" ? minPos : maxPos;
     const newPos = direction === "next" ? maxPos + 1 : minPos - 1;
     const outgoing = Array.from($slides).find(i => Number(i.dataset.pos) === targetPos);
@@ -147,14 +153,12 @@ function move(direction) {
         }
     }
 
-    // 전체 슬라이드 data-pos 업데이트
     getSlides().forEach(i => {
         const currentPos = Number(i.dataset.pos);
         i.dataset.pos = direction === "next" ? currentPos - 1 : currentPos + 1;
     });
 
     animatePos(direction, () => {
-        // 범위 벗어난 슬라이드 제거
         getSlides().forEach(i => {
             const pos = Number(i.dataset.pos);
             if ((direction === "next" && pos < minPos) || (direction === "prev" && pos > maxPos)) {
@@ -162,7 +166,6 @@ function move(direction) {
             }
         });
 
-        // center 슬라이드 위치 보정
         const {centerNextX, centerPrevX} = getConfig();
         const centerX = direction === "next" ? centerNextX : centerPrevX;
         const centerItem = Array.from(getSlides()).find(s => Number(s.dataset.pos) === 0);
@@ -177,14 +180,13 @@ function move(direction) {
     lastDirection = direction;
 }
 
-// 페이지네이션 버튼 active 상태 업데이트
+// pagination
 function updatePagination(activeSlide) {
     document.querySelectorAll('#pagination button').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.slide === activeSlide);
     });
 }
 
-// 페이지네이션 클릭 시 해당 슬라이드까지 단계적으로 이동
 function jumpTo(targetSlide) {
     if (isTransitioning) return;
 
@@ -225,7 +227,7 @@ function jumpTo(targetSlide) {
     step();
 }
 
-// 방향에 따라 마스크 클립패스 애니메이션 및 active/z-index 상태 관리
+// mask
 function updateActiveMask(direction = "next") {
     const $slides = getSlides();
     const firstSlideValue = $maskItem[0].dataset.mask;
@@ -245,7 +247,6 @@ function updateActiveMask(direction = "next") {
         if (prevMaskItem) prevMaskItem.classList.remove("z2");
         prevMaskItem = activeItem;
 
-        // 루프 경계: 마지막 슬라이드에서 첫 슬라이드로 넘어올 때 마스크 상태 초기화
         if (leavingSlide && leavingSlide.dataset.slide === lastSlideValue) {
             $maskItem.forEach((item) => {
                 if (item.dataset.mask === lastSlideValue) return;
@@ -259,7 +260,6 @@ function updateActiveMask(direction = "next") {
             if (lastMaskItem) lastMaskItem.classList.remove("active");
 
         } else {
-            // 이미 active인 마스크가 있으면 초기화 후 새 애니메이션 실행
             if (activeItem.classList.contains("active")) {
                 document.querySelectorAll('.mask-item.active').forEach(item => {
                     item.classList.remove("active");
@@ -268,7 +268,6 @@ function updateActiveMask(direction = "next") {
             }
         }
 
-        // 새 center 마스크 왼쪽에서 오른쪽으로 reveal
         activeItem.classList.add("active");
         gsap.fromTo(activeItem,
             {clipPath: "inset(0 0 0 100%)"},
@@ -288,7 +287,6 @@ function updateActiveMask(direction = "next") {
 
         updatePagination(centerNum);
 
-        // 새 center 마스크 오른쪽에서 왼쪽으로 reveal
         if (!centerItem.classList.contains("active")) {
             centerItem.classList.add("active");
             gsap.fromTo(centerItem,
@@ -297,14 +295,12 @@ function updateActiveMask(direction = "next") {
             );
         }
 
-        // 루프 경계: 첫 슬라이드가 빠져나갈 때 z-index 처리
         if (leavingSlide.dataset.slide === firstSlideValue) {
             if (prevMaskItem) prevMaskItem.classList.remove("z2");
             prevMaskItem = leavingItem;
             prevMaskItem.classList.add("z2");
         }
 
-        // leaving 마스크 오른쪽으로 가려지며 퇴장
         if (leavingItem.classList.contains("active")) {
             gsap.fromTo(leavingItem,
                 {clipPath: "inset(0 0 0 0%)"},
@@ -320,6 +316,9 @@ function updateActiveMask(direction = "next") {
 }
 
 window.addEventListener("load", () => {
+    // 원본 슬라이드 정보 저장
+    slideData = Array.from(getSlides()).map(s => s.dataset.slide);
+
     initVic();
 
     const firstSlide = Array.from(getSlides()).find(s => Number(s.dataset.pos) === 0);
@@ -333,14 +332,13 @@ window.addEventListener("load", () => {
     }
 });
 
-// 리사이즈 시 슬라이드 위치 및 반응형 레이아웃 재계산 (debounce 200ms)
 let resizeTimer;
 window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
-    // 리사이즈 전 현재 center 슬라이드 저장
-    const currentCenter = Array.from(getSlides()).find(s => Number(s.dataset.pos) === 0);
-    const currentCenterSlide = currentCenter?.dataset.slide || null;
-    resizeTimer = setTimeout(() => initVic(currentCenterSlide), 200);
+    resizeTimer = setTimeout(() => {
+        isTransitioning = false;
+        initVic();
+    }, 200);
 });
 
 $maskBtn.addEventListener("click", () => {

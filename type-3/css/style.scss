@@ -112,6 +112,7 @@ header {
     }
 
     &-cover {
+        background-image: url('../images/woody.jpg');
         @include background;
     }
 
