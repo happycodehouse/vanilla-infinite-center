@@ -47,9 +47,9 @@ function initVic() {
         i.dataset.pos = pos;
     });
 
+    lastDirection = "next";
     staticPos();
     updateActiveMask();
-    lastDirection = "next";
 }
 
 function staticPos(direction = "next") {
@@ -311,7 +311,7 @@ window.addEventListener("load", () => {
     }
 });
 
-window.addEventListener("resize", staticPos);
+window.addEventListener("resize", () => staticPos(lastDirection));
 
 $maskBtn.addEventListener("click", () => {
     $mask.classList.toggle("active");
