@@ -63,6 +63,10 @@ header {
             }
         }
     }
+
+    @include media(false, tablet) {
+
+    }
 }
 
 .container {

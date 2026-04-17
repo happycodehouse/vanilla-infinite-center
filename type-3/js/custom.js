@@ -30,8 +30,8 @@ function getConfig() {
     const maskW = $mask.offsetWidth;
     const gap = (parseFloat(rootStyle.getPropertyValue('--gap')) / 100) * window.innerWidth;
 
-    const centerNextX = (window.innerWidth - slideW) / 2 - slideW / 2;
-    const centerPrevX = (window.innerWidth - slideW) / 2 + slideW / 2;
+    const centerNextX = window.innerWidth / 2 - maskW / 2;
+    const centerPrevX = window.innerWidth / 2 + maskW / 2 - slideW;
     const maskRight = (window.innerWidth + maskW) / 2;
     const maskLeft = (window.innerWidth - maskW) / 2;
 
