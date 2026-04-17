@@ -75,6 +75,16 @@ header {
     .readme {
         padding: var(--page-padding);
 
+        a {
+            display: block;
+            margin-bottom: to_vw(12);
+            font-weight: 700;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
         p {
 
         }
