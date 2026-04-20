@@ -34,16 +34,13 @@
     }
 }
 
-.wrap {
-    overflow: hidden;
-}
-
 header {
-    color: #ffffff;
+    h1, p {
+        color: #ffffff;
+    }
 }
 
 .container {
-    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -182,9 +179,8 @@ header {
     width: 100%;
 
     &-wrapper {
-        width: 100%;
+        position: relative;
         height: 24vw;
-        overflow: hidden;
 
         @include media(false, mobile) {
             height: 70vw;
@@ -239,6 +235,7 @@ header {
     top: to_vw(24);
     left: 0;
     z-index: 1;
+    width: 100%;
     padding: var(--page-padding);
 
     button {
