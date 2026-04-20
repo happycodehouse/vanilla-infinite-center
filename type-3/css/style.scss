@@ -35,7 +35,9 @@
 }
 
 header {
-    color: #ffffff;
+    h1, p {
+        color: #ffffff;
+    }
 }
 
 .container {
@@ -177,7 +179,7 @@ header {
     width: 100%;
 
     &-wrapper {
-        width: 100%;
+        position: relative;
         height: 24vw;
 
         @include media(false, mobile) {
@@ -233,6 +235,7 @@ header {
     top: to_vw(24);
     left: 0;
     z-index: 1;
+    width: 100%;
     padding: var(--page-padding);
 
     button {
@@ -241,6 +244,7 @@ header {
         padding-right: to_vw(4);
         margin-bottom: to_vw(4);
         text-align: left;
+        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         font-size: inherit;
         color: #ffffff;
 
