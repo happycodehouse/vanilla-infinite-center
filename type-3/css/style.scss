@@ -91,10 +91,14 @@ header {
         position: fixed;
         top: 0;
         right: 0;
-        z-index: 1;
+        z-index: 1000;
         padding: var(--page-padding);
         font-family: "AustinNewsDeckWeb", sans-serif;
         color: #ffffff;
+
+        @include media(false, tablet) {
+            padding: var(--page-padding) var(--page-padding) 0 0;
+        }
     }
 
     > div { // .mask-logo, .mask-item
@@ -125,7 +129,6 @@ header {
             }
         }
 
-        //clip-path: inset(var(--clip));
         @include background;
 
         &.active {
