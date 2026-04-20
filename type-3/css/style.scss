@@ -39,6 +39,7 @@ header {
 }
 
 .container {
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -241,6 +242,7 @@ header {
         padding-right: to_vw(4);
         margin-bottom: to_vw(4);
         text-align: left;
+        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         font-size: inherit;
         color: #ffffff;
 
