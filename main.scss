@@ -22,9 +22,14 @@
     display: flex;
     width: 100%;
     height: 100vh;
+
+    @include media(false, tablet) {
+        flex-direction: column;
+    }
 }
 
 header {
+    position: relative;
     width: $headerW;
     border-right: 1px solid black;
     padding: var(--page-padding);
@@ -32,6 +37,33 @@ header {
     * {
         font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         font-size: inherit;
+    }
+
+    .trigger {
+        display: none;
+        position: relative;
+        width: to_vw(40);
+        height: to_vw(20);
+
+        span {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: black;
+
+            &:nth-child(1) {
+                top: 0;
+            }
+
+            &:nth-child(2) {
+                top: 50%;
+            }
+
+            &:nth-child(3) {
+                top: 100%;
+            }
+        }
     }
 
     .gnb {
@@ -65,7 +97,38 @@ header {
     }
 
     @include media(false, tablet) {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        padding: 0 var(--page-padding);
+        border-right: 0;
+        border-bottom: 1px solid black;
+        background: #ffffff;
 
+        &.active {
+            padding: 0 var(--page-padding) var(--page-padding);
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: to_vw($headerH);
+        }
+
+        .trigger {
+            display: block;
+        }
+
+        .gnb {
+            width: 100%;
+            margin: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
     }
 }
 
@@ -84,15 +147,16 @@ header {
                 text-decoration: underline;
             }
         }
-
-        p {
-
-        }
     }
 
     iframe {
         width: 100%;
         height: 100%;
+    }
 
+    @include media(false, tablet) {
+        width: 100%;
+        height: calc(100vh - to_vw($headerH));
+        margin-top: to_vw($headerH);
     }
 }
