@@ -180,6 +180,7 @@ header {
     &-wrapper {
         width: 100%;
         height: 24vw;
+        overflow: hidden;
 
         @include media(false, mobile) {
             height: 70vw;
