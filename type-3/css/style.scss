@@ -229,13 +229,12 @@ header {
 
 .pagination {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 0 to_vw(16);
     position: fixed;
     top: to_vw(24);
     left: 0;
     z-index: 1;
-    width: 100%;
     padding: var(--page-padding);
 
     button {
