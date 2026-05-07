@@ -213,7 +213,6 @@ header {
     @include media(false, tablet) {
         width: 100%;
         height: calc(100vh - to_vw($headerH));
-        height: calc(100svh - to_vw($headerH));
         margin-top: to_vw($headerH);
     }
 }
