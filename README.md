@@ -1,9 +1,9 @@
 # 🍦 Vanilla Infinite Center Carousel
 > Lightweight infinite center carousel with pure Vanilla JavaScript - Zero dependencies
 
-<!-- <p align="left">
-<img src="./images/preview.png" alt="Preview Image" width="600">
-</p> -->
+<p align="left">
+<img src="./shared/images/preview.png" alt="Preview Image" width="620">
+</p>
 
 [🔗 Live Demo](https://vanilla-infinite-center.netlify.app/)
 
