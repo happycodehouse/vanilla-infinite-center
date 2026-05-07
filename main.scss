@@ -177,6 +177,7 @@ header {
         width: to_vw(320);
         aspect-ratio: 16/9;
         margin: to_vw(10) 0;
+        border: 1px solid $maskColor;
 
         .img {
             position: absolute;
