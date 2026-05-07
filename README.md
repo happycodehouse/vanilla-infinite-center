@@ -1,5 +1,5 @@
-# 🎠 Vanilla Infinite Center Carousel
-> A custom infinite carousel with a wider center slide, built in vanilla JavaScript
+# 🍦 Vanilla Infinite Center Carousel
+> Lightweight infinite center carousel with pure Vanilla JavaScript - Zero dependencies
 
 <!-- <p align="left">
 <img src="./images/preview.png" alt="Preview Image" width="600">
