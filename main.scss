@@ -147,6 +147,7 @@ header {
     width: calc(100% - #{$headerW});
 
     .readme {
+        height: 100%;
         padding: var(--page-padding);
 
         a {
@@ -157,6 +158,49 @@ header {
             &:hover {
                 text-decoration: underline;
             }
+        }
+    }
+
+    @keyframes fadeInOut {
+        0%     { opacity: 1; }
+        33.3%  { opacity: 1; }
+        33.4%  { opacity: 0; }
+        100%   { opacity: 0; }
+    }
+
+    $total: 3;
+    $duration: 6s;
+    $per: $duration / $total;
+
+    .img-box {
+        position: relative;
+        width: to_vw(320);
+        aspect-ratio: 16/9;
+        margin: to_vw(10) 0;
+
+        .img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+        }
+
+        @for $i from 1 through $total {
+            .img#{$i} {
+                background-image: url('./shared/images/preview-type-#{$i}.png');
+                animation: fadeInOut $duration linear infinite;
+                animation-delay: $per * ($i - 1);
+            }
+        }
+
+        .img1 {
+            opacity: 1;
+            animation-delay: 0s;
         }
     }
 
