@@ -202,6 +202,7 @@
 
         &.active {
             text-decoration: underline;
+            font-weight: bold;
 
             &::before {
                 opacity: 1;
@@ -217,5 +218,9 @@
             font-size: 8px;
             opacity: 0;
         }
+    }
+
+    @include media(false, mobile) {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
