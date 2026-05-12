@@ -30,6 +30,10 @@
             display: flex;
         }
     }
+
+    @include media(false, tablet) {
+        border: 3px solid $maskColor;
+    }
 }
 
 .mask-btn {
