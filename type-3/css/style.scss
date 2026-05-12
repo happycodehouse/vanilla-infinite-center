@@ -151,7 +151,7 @@
         top: 50%;
         transform: translateY(-50%);
         width: var(--slideItemW);
-        aspect-ratio: 3 / 4;
+        aspect-ratio: 1 / 1;
         @include background;
     }
 }
@@ -168,12 +168,12 @@
     z-index: 9999;
 
     button {
+        font-family: "AustinNewsDeckWeb", sans-serif;
+        color: #999;
+
         &:hover {
             text-decoration: underline;
         }
-
-        font-family: "AustinNewsDeckWeb", sans-serif;
-        color: #999;
     }
 }
 
