@@ -1,4 +1,4 @@
-const $mask = document.getElementById("mask");
+const $mask = document.getElementById("maskWrapper");
 const $vicWrapper = document.querySelector(".vic-wrapper");
 const $nextBtn = document.getElementById("nextBtn");
 const $prevBtn = document.getElementById("prevBtn");

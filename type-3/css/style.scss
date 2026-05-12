@@ -7,30 +7,22 @@
 @use "../../shared/css/base/container" as *;
 
 :root {
-    --gap: 3vw;
-    --maskW: 25vw;
-    --slideItemW: 15vw;
+    --gap: 6vw;
+    --maskW: 24vw;
+    --slideItemW: 18vw;
     --clip: 0 0 0 100%;
 
     @media (max-width: 768px) {
-        --gap: 8vw;
-        --maskW: 60vw;
-        --slideItemW: 30vw;
+        --gap: 2vw;
+        --maskW: 48vw;
+        --slideItemW: 40vw;
     }
 }
 
 @mixin background {
     background-size: contain;
-    background-position: top;
+    background-position: center;
     background-repeat: no-repeat;
-}
-
-@mixin slideBackground {
-
-}
-
-@mixin maskBackground {
-
 }
 
 @keyframes blinkAni {
@@ -51,99 +43,87 @@
     background: #F4F4F2;
 }
 
-.mask {
+.mask-wrapper {
     overflow: hidden;
-    position: fixed;
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: var(--maskW);
-    height: var(--maskW);
-    aspect-ratio: 1 / 2;
-    padding-block: 1px;
+    height: 100%;
 
     &.active {
         z-index: 9;
     }
+}
 
-    &-btn {
-        &:hover {
-            text-decoration: underline;
-        }
+.mask-btn {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+    padding: var(--page-padding);
+    font-family: "AustinNewsDeckWeb", sans-serif;
 
-        position: fixed;
-        top: 0;
-        right: 0;
-        z-index: 1000;
-        padding: var(--page-padding);
-        font-family: "AustinNewsDeckWeb", sans-serif;
+    &:hover {
+        text-decoration: underline;
+    }
 
-        @include media(false, tablet) {
-            padding: var(--page-padding) var(--page-padding) 0 0;
+    @include media(false, tablet) {
+        padding: var(--page-padding) var(--page-padding) 0 0;
+    }
+}
+
+.mask-item {
+    $dessert-items: '01', '02', '03', '04', '05', '06', '07';
+    @each $num in $dessert-items {
+        &[data-mask="dessert-#{$num}"] {
+            .img {
+                background-image: url('../images/dessert-#{$num}.png');
+            }
         }
     }
 
-    > div { // .mask-logo, .mask-item
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-end;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 100%;
-        height: 100%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: to_vw(20);
+    width: 100%;
+    border: 1px solid #F4F4F2;
+    background-color: #F4F4F2;
+
+    &.active {
+        --clip: 0 0 0 0;
+        z-index: 1;
     }
 
-    &-cover {
-        background-image: url('../images/dessert-01.webp');
+    &.z2 {
+        z-index: 2;
+    }
+
+    .img {
+        width: var(--maskW);
+        height: var(--maskW);
         @include background;
     }
 
-    &-item {
-        $dessert-items: '01', '02', '03', '04', '05', '06', '07';
-
-        @each $num in $dessert-items {
-            &[data-mask="dessert-#{$num}"] {
-                background-image: url('../images/dessert-#{$num}.webp');
-            }
-        }
-
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 130%;
-
-        &.active {
-            --clip: 0 0 0 0;
-            z-index: 1;
-        }
-
-        &.z2 {
-            z-index: 2;
-        }
-
-        span, p {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            font-family: "ZenSerif", serif;
-        }
+    .txt {
+        font-family: "ZenSerif", serif;
 
         span {
             font-size: 16px;
-            margin-bottom: 20px;
             font-weight: bold;
-        }
-
-        p {
-            width: 66.6%;
         }
     }
 }
 
 .vic {
-    overflow: hidden;
+    position: relative;
     width: 100%;
 
     &-wrapper {
@@ -172,9 +152,7 @@
         transform: translateY(-50%);
         width: var(--slideItemW);
         aspect-ratio: 3 / 4;
-        background-position: center 40%;
-        background-repeat: no-repeat;
-        background-size: contain;
+        @include background;
     }
 }
 
@@ -183,9 +161,11 @@
     align-items: center;
     justify-content: center;
     gap: to_vw(10);
-    position: relative;
+    position: absolute;
+    left: 0;
+    bottom: to_vw(-40);
+    width: 100%;
     z-index: 9999;
-    margin-top: to_vw(20);
 
     button {
         &:hover {
@@ -199,7 +179,7 @@
 
 .pagination {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 0 to_vw(16);
     position: fixed;
     top: to_vw(24);
