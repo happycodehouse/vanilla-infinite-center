@@ -213,6 +213,10 @@ header {
             opacity: 1;
             animation-delay: 0s;
         }
+
+        @include media(false, tablet) {
+            width: 100%;
+        }
     }
 
     iframe {
